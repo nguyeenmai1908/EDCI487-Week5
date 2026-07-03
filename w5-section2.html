@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section 2: What Is a Complex Adaptive System? — EDCI 487 Week 5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:    #2d5a3f;
+      --near-black:#1c1a14;
+      --moss:      #4a6741;
+      --sage:      #7a9e6e;
+      --sage-pale: #deebd4;
+      --clay:      #c4622d;
+      --ember:     #e8874a;
+      --sand:      #e8d5b0;
+      --cream:     #f5f0e8;
+      --white:     #fefcf8;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: var(--cream); color: var(--near-black); min-height: 100vh; }
+    body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--ember)); transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear; z-index: 1000; }
+
+    /* HAMBURGER TOGGLE */
+    .sidebar-toggle { position: fixed; top: 1.25rem; left: 1.25rem; z-index: 200; width: 40px; height: 40px; background: rgba(47,74,47,0.9); border: 1px solid rgba(122,158,110,0.25); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 0.2s; }
+    .sidebar-toggle:hover { background: rgba(47,74,47,1); }
+    .sidebar-toggle .bar { display: block; width: 18px; height: 2px; background: var(--cream); border-radius: 1px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .sidebar-toggle.open .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle.open .bar:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #2f4a2f; border-right: 1px solid rgba(122,158,110,0.2); z-index: 150; display: flex; flex-direction: column; align-items: stretch; padding: 4.5rem 0 2rem; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s ease; text-align: left; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,158,110,0.5); padding: 0 1rem 1.5rem 2rem; border-bottom: 1px solid rgba(122,158,110,0.1); margin-bottom: 1.5rem; line-height: 1.6; }
+    .sidebar-nav { display: flex; flex-direction: column; padding: 0; }
+    .nav-item { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1rem 0.7rem 2rem; position: relative; text-decoration: none; transition: background 0.2s ease; width: 100%; }
+    .nav-item:hover { background: rgba(245,240,232,0.04); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--clay); }
+    .nav-num { font-size: 0.68rem; font-weight: 500; color: rgba(245,240,232,0.25); width: 1.5rem; flex-shrink: 0; text-align: left; }
+    .nav-item.active .nav-num { color: var(--clay); }
+    .nav-label { font-size: 0.75rem; font-weight: 300; line-height: 1.4; color: rgba(245,240,232,0.35); flex: 1; min-width: 0; text-align: left; }
+    .nav-item.active .nav-label { color: var(--cream); font-weight: 500; }
+    .nav-time { font-size: 0.6rem; color: rgba(245,240,232,0.22); letter-spacing: 0.06em; flex-shrink: 0; white-space: nowrap; }
+
+    .block-inner { width: min(1080px, 100%); margin: 0 auto; }
+
+    .section-header { background: var(--forest); padding: 2.5rem 3rem; }
+    .section-header-row { display: flex; align-items: center; gap: 1.5rem; }
+    .sh-number { font-family: 'Playfair Display', serif; font-size: 10rem; font-weight: 900; color: rgba(255,255,255,0.2); line-height: 1; flex-shrink: 0; user-select: none; }
+    .sh-center { flex: 1; }
+    .sh-label { font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.35rem; }
+    .sh-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .sh-time { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.28); flex-shrink: 0; align-self: center; }
+
+    /* Learning objectives */
+    .objectives-bar { background: var(--sage-pale); border-top: 1px solid rgba(74,103,65,0.1); padding: 1.5rem 3rem; }
+    .objectives-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--moss); margin-bottom: 0.75rem; font-weight: 500; }
+    .objectives-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+    .objectives-list li { font-size: 0.82rem; line-height: 1.6; color: var(--forest); padding-left: 1rem; position: relative; }
+    .objectives-list li::before { content: '\2022'; position: absolute; left: 0; color: var(--moss); }
+
+    .content-block { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .content-block.alt { background: var(--cream); }
+    .content-block p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block strong { font-weight: 500; color: var(--near-black); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+
+    /* Reading focus prompts */
+    .focus-block { background: var(--sage-pale); padding: 3rem; }
+    .focus-label { font-size: 0.85rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--moss); margin-bottom: 0.5rem; }
+    .focus-heading { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--forest); margin-bottom: 1.5rem; }
+    .focus-list { list-style: none; display: flex; flex-direction: column; gap: 1.25rem; }
+    .focus-list li { font-size: 0.95rem; line-height: 1.8; color: var(--near-black); background: rgba(255,255,255,0.7); border: 1px solid rgba(74,103,65,0.1); border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .focus-list li .focus-num { font-size: 0.65rem; font-weight: 600; color: var(--clay); background: rgba(196,98,45,0.1); border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; margin-right: 0.6rem; vertical-align: middle; }
+
+    /* Reading card */
+    .reading-card { background: var(--white); border: 1px solid rgba(74,103,65,0.15); border-radius: 12px; padding: 2rem; margin: 0 auto; }
+    .reading-card-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.75rem; font-weight: 500; }
+    .reading-card-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--forest); line-height: 1.35; margin-bottom: 0.5rem; }
+    .reading-card-meta { font-size: 0.78rem; color: rgba(26,46,26,0.5); margin-bottom: 1.25rem; line-height: 1.5; }
+    .reading-card-link { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clay); text-decoration: none; transition: color 0.2s; }
+    .reading-card-link:hover { color: var(--ember); }
+    .reading-card-link .arrow { width: 16px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .reading-card-link:hover .arrow { width: 22px; }
+    .reading-card-link .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 6px; height: 6px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+
+    /* CAS Properties grid */
+    .cas-section { background: var(--forest); padding: 3.5rem 3rem; }
+    .cas-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.5rem; font-weight: 500; }
+    .cas-heading { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--cream); margin-bottom: 0.75rem; }
+    .cas-intro { font-size: 0.92rem; line-height: 1.8; color: rgba(245,240,232,0.5); margin-bottom: 2rem; max-width: 800px; }
+    .cas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .cas-card { background: rgba(245,240,232,0.15); border: 1px solid rgba(122,158,110,0.25); border-radius: 12px; padding: 1.5rem; }
+    .cas-icon { font-size: 1.6rem; margin-bottom: 0.75rem; }
+    .cas-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--cream); margin-bottom: 0.5rem; }
+    .cas-desc { font-size: 0.82rem; line-height: 1.7; color: rgba(245,240,232,0.5); font-weight: 300; }
+
+    /* transition card */
+    .transition-card { padding: 3rem; background: var(--forest); }
+    .transition-card p { font-size: 1rem; line-height: 1.8; color: rgba(245,240,232,0.65); font-style: italic; font-family: 'Playfair Display', serif; }
+    .transition-card-line { width: 40px; height: 2px; background: var(--clay); margin-bottom: 1.5rem; }
+
+    /* hover tooltip spot */
+    .tooltip-wrap { display: inline; position: relative; }
+    .tooltip-spot { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--clay); color: var(--white); font-size: 0.65rem; font-weight: 700; border-radius: 50%; cursor: help; vertical-align: middle; margin-left: 0.35rem; line-height: 1; font-style: normal; font-family: 'DM Sans', sans-serif; }
+    .tooltip-spot:hover { background: var(--ember); }
+    .tooltip-bubble { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 280px; background: var(--white); color: var(--near-black); font-size: 0.82rem; font-weight: 300; line-height: 1.7; padding: 1rem 1.15rem; border-radius: 10px; border: 1px solid rgba(74,103,65,0.15); box-shadow: 0 4px 16px rgba(0,0,0,0.12); opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; transform: translateX(-50%) translateY(4px); z-index: 50; }
+    .tooltip-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--white); }
+    .tooltip-wrap:hover .tooltip-bubble { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+
+    /* begin / continue */
+    .begin-section { background: var(--cream); padding: 4rem 3rem; display: flex; justify-content: space-between; align-items: center; gap: 4rem; }
+    .begin-text .begin-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.6rem; }
+    .begin-text .begin-sub { font-size: 1rem; line-height: 1.75; color: rgba(26,46,26,0.6); max-width: 480px; }
+    .begin-action { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0; }
+    .btn-begin { display: inline-flex; align-items: center; gap: 1rem; background: var(--clay); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 1rem 2rem; border-radius: 4px; transition: background 0.2s; }
+    .btn-begin:hover { background: var(--ember); }
+    .btn-begin .arrow { width: 20px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .btn-begin:hover .arrow { width: 28px; }
+    .btn-begin .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+    .time-note { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,46,26,0.35); }
+
+    @media (max-width: 768px) {
+      .section-header, .content-block, .focus-block, .cas-section, .transition-card, .begin-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .objectives-bar { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sh-number { font-size: 5rem; }
+      .begin-section { flex-direction: column; align-items: flex-start; }
+      .begin-action { align-items: flex-start; }
+      .cas-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<button class="sidebar-toggle" aria-label="Toggle navigation">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">EDCI 487<br>Climate Change Education<br>Week 5</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="week5-intro.html">
+      <span class="nav-num">&#8593;</span>
+      <span class="nav-label">Intro &amp; Overview</span>
+    </a>
+    <a class="nav-item" href="w5-section1.html">
+      <span class="nav-num">01</span>
+      <span class="nav-label">Welcome &amp; Framing</span>
+    </a>
+    <a class="nav-item active" href="w5-section2.html">
+      <span class="nav-num">02</span>
+      <span class="nav-label">What Is a Complex Adaptive System?</span>
+    </a>
+    <a class="nav-item" href="w5-section3.html">
+      <span class="nav-num">03</span>
+      <span class="nav-label">Planetary Boundaries</span>
+    </a>
+    <a class="nav-item" href="w5-section4.html">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Teaching with Complexity</span>
+    </a>
+    <a class="nav-item" href="w5-section5.html">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Before You Arrive</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- SECTION HEADER -->
+<section class="section-header">
+  <div class="block-inner section-header-row">
+    <div class="sh-number">02</div>
+    <div class="sh-center">
+      <div class="sh-label">Section 2 of 5</div>
+      <div class="sh-title reveal">What Is a Complex Adaptive System?</div>
+    </div>
+    <div class="sh-time reveal">~8 minutes</div>
+  </div>
+</section>
+
+<!-- LEARNING OBJECTIVES -->
+<section class="objectives-bar">
+  <div class="block-inner">
+    <div class="objectives-label">By the end of this section, you will be able to</div>
+    <ul class="objectives-list">
+      <li>Recognize a feedback loop using a concrete example (the ice-albedo loop)</li>
+      <li>Explain how Talukder's (2024) framework applies systems thinking to climate and health</li>
+      <li>Name the six core properties of a complex adaptive system, using examples you've already seen</li>
+    </ul>
+  </div>
+</section>
+
+<!-- BODY TEXT — CONCRETE EXAMPLE -->
+<section class="content-block reveal">
+  <div class="block-inner">
+    <p>You can roughly predict the weather next week, but not exactly. Not because we lack the tools — because the system has too many moving parts that all affect each other.</p>
+    <p>Here is one example of how that works: <strong>Arctic ice melts → darker ocean absorbs more heat → more ice melts.</strong><span class="tooltip-wrap"><span class="tooltip-spot">?</span><span class="tooltip-bubble">Ice is white — it bounces sunlight back into space. Ocean water is dark — it soaks that heat up instead. So when ice melts, the surface absorbs more energy, which melts even more ice.</span></span> Nobody planned that loop. It just happens — the system responds to itself. That is a complex adaptive system in miniature.</p>
+    <p>Climate change is full of loops like this. They overlap, they push and pull on each other, and they do not point to a single cause or a single fix.</p>
+  </div>
+</section>
+
+<!-- BODY TEXT — TALUKDER FRAMEWORK -->
+<section class="content-block alt reveal">
+  <div class="block-inner">
+    <p>Talukder (2024) applies this same thinking to <strong>human health</strong> — showing how poverty, pollution, and inequality feed into each other the same way ice and ocean heat do. The system is different, but the shape is the same.</p>
+    <p>As you read, watch for the loops — places where one change triggers another that circles back to where it started.</p>
+  </div>
+</section>
+
+<!-- READING FOCUS PROMPTS -->
+<section class="focus-block reveal">
+  <div class="block-inner">
+    <div class="focus-label">As you read, look for</div>
+    <h3 class="focus-heading">Three things to spot in the text</h3>
+    <ol class="focus-list">
+      <li>
+        <span class="focus-num">01</span>
+        Find <strong>one loop or ripple effect</strong> in the health framework — something that feeds back into itself, the way the ice-albedo example did. What is it?
+      </li>
+      <li>
+        <span class="focus-num">02</span>
+        The framework emphasizes <strong>social determinants</strong> alongside ecological ones. How does this connect to what you learned in Week 3 about climate justice?
+      </li>
+      <li>
+        <span class="focus-num">03</span>
+        What would a <strong>systems approach to teaching</strong> look like in K–12? What might you have to give up from a more traditional lesson structure?
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- READING CARD -->
+<section class="content-block reveal">
+  <div class="block-inner">
+    <div class="reading-card">
+      <div class="reading-card-label">Required Reading — Open in New Tab</div>
+      <div class="reading-card-title">Complex Adaptive Systems-Based Framework for Modeling the Health Impacts of Climate Change</div>
+      <div class="reading-card-meta">Talukder, B. (2024) · ScienceDirect · ~12 minutes · open access</div>
+      <a class="reading-card-link" href="https://www.sciencedirect.com/science/article/pii/S2667278223000913" target="_blank" rel="noopener">
+        Read article <span class="arrow"></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CAS PROPERTIES GRID -->
+<section class="cas-section reveal">
+  <div class="block-inner">
+    <div class="cas-label">Naming the Pattern</div>
+    <h2 class="cas-heading">You just saw a complex adaptive system at work. Here are the ideas behind it.</h2>
+    <p class="cas-intro">The ice-albedo loop, and the patterns you spotted in Talukder's framework, are both examples of the same six properties. You don't need to memorize these — just recognize them when they show up.</p>
+    <div class="cas-grid">
+      <div class="cas-card reveal" data-delay="1">
+        <div class="cas-icon">&#128260;</div>
+        <div class="cas-name">Feedback Loops</div>
+        <div class="cas-desc">Outputs become inputs. Like the ice-albedo loop above — the system responds to itself.</div>
+      </div>
+      <div class="cas-card reveal" data-delay="2">
+        <div class="cas-icon">&#127807;</div>
+        <div class="cas-name">Emergence</div>
+        <div class="cas-desc">Outcomes arise from interactions, not from any single cause. No one designed a refugee crisis — it emerged from a system.</div>
+      </div>
+      <div class="cas-card reveal" data-delay="3">
+        <div class="cas-icon">&#9878;&#65039;</div>
+        <div class="cas-name">Non-linearity</div>
+        <div class="cas-desc">Small changes can produce large effects. Large interventions can produce surprisingly small ones. Cause and effect aren't proportional.</div>
+      </div>
+      <div class="cas-card reveal" data-delay="1">
+        <div class="cas-icon">&#128279;</div>
+        <div class="cas-name">Interdependence</div>
+        <div class="cas-desc">Components affect each other across boundaries — ecological, social, economic, political. You can't change one part without touching others.</div>
+      </div>
+      <div class="cas-card reveal" data-delay="2">
+        <div class="cas-icon">&#129513;</div>
+        <div class="cas-name">Adaptation</div>
+        <div class="cas-desc">The system responds to change. Governments, markets, communities adjust their behaviour — creating both resilience and new vulnerabilities.</div>
+      </div>
+      <div class="cas-card reveal" data-delay="3">
+        <div class="cas-icon">&#9889;</div>
+        <div class="cas-name">Tipping Points</div>
+        <div class="cas-desc">Gradual pressure can produce sudden, irreversible shifts. The system crosses a threshold and reorganizes into a different state.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSITION CARD -->
+<div class="transition-card reveal">
+  <div class="block-inner">
+    <div class="transition-card-line"></div>
+    <p>The system is not broken. It is functioning as designed — just in ways that are no longer safe. Next: the planetary boundaries that define what "safe" means.</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="begin-section reveal">
+  <div class="block-inner" style="display:flex; justify-content:space-between; align-items:center; gap:4rem; width:100%; flex-wrap:wrap;">
+    <div class="begin-text">
+      <h2 class="begin-heading">On to the next layer.</h2>
+      <p class="begin-sub">
+        You've seen the pattern up close and named the vocabulary for it. Section 3 zooms out to the planetary scale — the boundaries that define a safe operating space for Earth systems.
+      </p>
+    </div>
+    <div class="begin-action">
+      <a class="btn-begin" href="w5-section3.html">
+        Section 3 <span class="arrow"></span>
+      </a>
+      <span class="time-note">Next: Planetary Boundaries</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const scrolled = max > 0 ? Math.min(doc.scrollTop / max, 1) : 1;
+    const progress = 0.2 + scrolled * 0.2;
+    document.getElementById('progress-bar').style.transform = `scaleX(${progress})`;
+  });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sidebar toggle
+  const toggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.classList.add('open');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', function () {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>

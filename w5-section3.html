@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Section 3: Planetary Boundaries — EDCI 487 Week 5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --forest:    #2d5a3f;
+      --near-black:#1c1a14;
+      --moss:      #4a6741;
+      --sage:      #7a9e6e;
+      --sage-pale: #deebd4;
+      --clay:      #c4622d;
+      --ember:     #e8874a;
+      --sand:      #e8d5b0;
+      --cream:     #f5f0e8;
+      --white:     #fefcf8;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; font-weight: 300; background: var(--cream); color: var(--near-black); min-height: 100vh; }
+    body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.035; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    #progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--clay), var(--ember)); transform-origin: left; transform: scaleX(0); transition: transform 0.1s linear; z-index: 1000; }
+
+    /* HAMBURGER TOGGLE */
+    .sidebar-toggle { position: fixed; top: 1.25rem; left: 1.25rem; z-index: 200; width: 40px; height: 40px; background: rgba(47,74,47,0.9); border: 1px solid rgba(122,158,110,0.25); border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background 0.2s; }
+    .sidebar-toggle:hover { background: rgba(47,74,47,1); }
+    .sidebar-toggle .bar { display: block; width: 18px; height: 2px; background: var(--cream); border-radius: 1px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .sidebar-toggle.open .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle.open .bar:nth-child(2) { opacity: 0; }
+    .sidebar-toggle.open .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: #2f4a2f; border-right: 1px solid rgba(122,158,110,0.2); z-index: 150; display: flex; flex-direction: column; align-items: stretch; padding: 4.5rem 0 2rem; overflow-y: auto; transform: translateX(-100%); transition: transform 0.3s ease; text-align: left; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-logo { font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(122,158,110,0.5); padding: 0 1rem 1.5rem 2rem; border-bottom: 1px solid rgba(122,158,110,0.1); margin-bottom: 1.5rem; line-height: 1.6; }
+    .sidebar-nav { display: flex; flex-direction: column; padding: 0; }
+    .nav-item { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1rem 0.7rem 2rem; position: relative; text-decoration: none; transition: background 0.2s ease; width: 100%; }
+    .nav-item:hover { background: rgba(245,240,232,0.04); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--clay); }
+    .nav-num { font-size: 0.68rem; font-weight: 500; color: rgba(245,240,232,0.25); width: 1.5rem; flex-shrink: 0; text-align: left; }
+    .nav-item.active .nav-num { color: var(--clay); }
+    .nav-label { font-size: 0.75rem; font-weight: 300; line-height: 1.4; color: rgba(245,240,232,0.35); flex: 1; min-width: 0; text-align: left; }
+    .nav-item.active .nav-label { color: var(--cream); font-weight: 500; }
+    .nav-time { font-size: 0.6rem; color: rgba(245,240,232,0.22); letter-spacing: 0.06em; flex-shrink: 0; white-space: nowrap; }
+
+    .block-inner { width: min(1080px, 100%); margin: 0 auto; }
+
+    .section-header { background: var(--forest); padding: 2.5rem 3rem; }
+    .section-header-row { display: flex; align-items: center; gap: 1.5rem; }
+    .sh-number { font-family: 'Playfair Display', serif; font-size: 10rem; font-weight: 900; color: rgba(255,255,255,0.2); line-height: 1; flex-shrink: 0; user-select: none; }
+    .sh-center { flex: 1; }
+    .sh-label { font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.35rem; }
+    .sh-title { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 700; color: var(--cream); line-height: 1.25; }
+    .sh-time { font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.28); flex-shrink: 0; align-self: center; }
+
+    /* Learning objectives */
+    .objectives-bar { background: var(--sage-pale); border-top: 1px solid rgba(74,103,65,0.1); padding: 1.5rem 3rem; }
+    .objectives-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--moss); margin-bottom: 0.75rem; font-weight: 500; }
+    .objectives-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+    .objectives-list li { font-size: 0.82rem; line-height: 1.6; color: var(--forest); padding-left: 1rem; position: relative; }
+    .objectives-list li::before { content: '\2022'; position: absolute; left: 0; color: var(--moss); }
+
+    .content-block { background: var(--white); padding: 3.5rem 3rem 2.5rem; }
+    .content-block.alt { background: var(--cream); }
+    .content-block p { font-size: 1rem; line-height: 1.9; color: rgba(26,46,26,0.75); margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block strong { font-weight: 500; color: var(--near-black); }
+
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: 0.1s; }
+    .reveal[data-delay="2"] { transition-delay: 0.2s; }
+    .reveal[data-delay="3"] { transition-delay: 0.3s; }
+
+    /* Predict-before-reveal interaction */
+    .predict-block { background: var(--sand); padding: 3.5rem 3rem; }
+    .predict-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.5rem; font-weight: 500; }
+    .predict-heading { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest); margin-bottom: 0.75rem; }
+    .predict-body { font-size: 1rem; line-height: 1.8; color: rgba(26,46,26,0.7); margin-bottom: 1.5rem; }
+    .predict-prompt { font-size: 0.95rem; font-style: italic; color: var(--forest); margin-bottom: 1.5rem; line-height: 1.7; }
+    .predict-options { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .predict-btn { background: var(--white); border: 1px solid rgba(74,103,65,0.2); border-radius: 8px; padding: 0.6rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; color: var(--forest); cursor: pointer; transition: all 0.2s; }
+    .predict-btn:hover { border-color: var(--clay); color: var(--clay); }
+    .predict-btn.selected { background: var(--clay); color: var(--white); border-color: var(--clay); }
+    .predict-hint { font-size: 0.78rem; color: rgba(26,46,26,0.4); font-style: italic; margin-bottom: 1.5rem; }
+    .reveal-btn { display: inline-flex; align-items: center; gap: 0.75rem; background: var(--forest); color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; border: none; padding: 0.85rem 1.75rem; border-radius: 4px; cursor: pointer; transition: background 0.2s; }
+    .reveal-btn:hover { background: var(--moss); }
+    .reveal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .reveal-btn .arrow { width: 16px; height: 1px; background: currentColor; position: relative; }
+    .reveal-btn .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 6px; height: 6px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+
+    /* Reveal result */
+    .reveal-result { display: none; }
+    .reveal-result.shown { display: block; }
+    .reveal-feedback { font-size: 1.05rem; font-weight: 500; color: var(--clay); margin-bottom: 0.5rem; }
+    .reveal-result-heading { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--forest); margin-bottom: 1rem; }
+    .reveal-note { font-size: 0.88rem; line-height: 1.8; color: rgba(26,46,26,0.6); font-style: italic; margin-top: 0.75rem; }
+
+    /* Boundaries table */
+    .boundaries-section { background: var(--white); padding: 3.5rem 3rem; }
+    .boundaries-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.5rem; font-weight: 500; }
+    .boundaries-heading { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--forest); margin-bottom: 1.5rem; }
+    .boundaries-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; margin-bottom: 1.5rem; }
+    .pb-diagram { margin: 0; }
+    .pb-diagram img { width: 100%; display: block; border-radius: 12px; }
+    .pb-diagram figcaption { font-size: 0.72rem; color: rgba(26,46,26,0.4); text-align: center; margin-top: 0.6rem; line-height: 1.5; }
+    .boundaries-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+    .boundary-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; border-radius: 10px; border: 1px solid rgba(74,103,65,0.1); background: var(--white); }
+    .boundary-row.exceeded { border-left: 3px solid var(--clay); }
+    .boundary-row.safe { border-left: 3px solid var(--sage); }
+    .boundary-status { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; flex-shrink: 0; width: 5.5rem; }
+    .boundary-row.exceeded .boundary-status { color: var(--clay); }
+    .boundary-row.safe .boundary-status { color: var(--sage); }
+    .boundary-name { font-size: 0.92rem; font-weight: 400; color: var(--near-black); flex: 1; }
+    .boundary-name em { font-style: italic; font-size: 0.82rem; color: rgba(26,46,26,0.5); }
+    .boundaries-note { font-size: 0.95rem; line-height: 1.85; color: rgba(26,46,26,0.7); }
+
+    /* Reflection textarea */
+    .reflect-block { background: var(--sage-pale); padding: 3rem; }
+    .reflect-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--moss); margin-bottom: 0.5rem; font-weight: 500; }
+    .reflect-heading { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--forest); margin-bottom: 0.75rem; }
+    .reflect-body { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.7); margin-bottom: 1.25rem; }
+    .reflect-prompt { font-size: 0.95rem; font-style: italic; color: var(--forest); line-height: 1.7; margin-bottom: 1.25rem; }
+    .reflect-textarea { width: 100%; min-height: 120px; padding: 1rem 1.25rem; border: 1px solid rgba(74,103,65,0.2); border-radius: 10px; background: rgba(255,255,255,0.8); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 300; line-height: 1.7; color: var(--near-black); resize: vertical; }
+    .reflect-textarea::placeholder { color: rgba(26,46,26,0.35); }
+    .reflect-textarea:focus { outline: none; border-color: var(--sage); }
+    .reflect-note { font-size: 0.78rem; color: rgba(26,46,26,0.45); font-style: italic; margin-top: 0.75rem; }
+    .reflect-scaffold { margin-top: 1rem; }
+    .scaffold-toggle { font-size: 0.78rem; font-weight: 500; color: var(--moss); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; font-family: 'DM Sans', sans-serif; }
+    .scaffold-toggle:hover { color: var(--forest); }
+    .scaffold-list { list-style: none; display: none; margin-top: 0.75rem; padding-left: 0; }
+    .scaffold-list.shown { display: flex; flex-direction: column; gap: 0.4rem; }
+    .scaffold-list li { font-size: 0.82rem; line-height: 1.6; color: rgba(26,46,26,0.6); padding-left: 1rem; position: relative; }
+    .scaffold-list li::before { content: '\2014'; position: absolute; left: 0; color: var(--sage); }
+
+    /* Guided exploration */
+    .explore-block { background: var(--sage-pale); padding: 3rem; border-top: 1px solid rgba(74,103,65,0.1); }
+    .explore-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.5rem; font-weight: 500; }
+    .explore-heading { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--forest); margin-bottom: 0.75rem; }
+    .explore-body { font-size: 0.95rem; line-height: 1.8; color: rgba(26,46,26,0.7); margin-bottom: 1.25rem; }
+    .explore-tasks { list-style: none; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+    .explore-tasks li { font-size: 0.95rem; line-height: 1.8; color: var(--near-black); background: rgba(255,255,255,0.7); border: 1px solid rgba(74,103,65,0.1); border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .explore-tasks li .task-num { font-size: 0.65rem; font-weight: 600; color: var(--clay); background: rgba(196,98,45,0.1); border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; margin-right: 0.6rem; vertical-align: middle; }
+    .explore-link { display: inline-flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clay); text-decoration: none; transition: color 0.2s; }
+    .explore-link:hover { color: var(--ember); }
+    .explore-link .arrow { width: 16px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .explore-link:hover .arrow { width: 22px; }
+    .explore-link .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 6px; height: 6px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+
+    /* transition card */
+    .transition-card { padding: 3rem; background: var(--forest); }
+    .transition-card p { font-size: 1rem; line-height: 1.8; color: rgba(245,240,232,0.65); font-style: italic; font-family: 'Playfair Display', serif; }
+    .transition-card-line { width: 40px; height: 2px; background: var(--clay); margin-bottom: 1.5rem; }
+
+    /* begin / continue */
+    .begin-section { background: var(--cream); padding: 4rem 3rem; display: flex; justify-content: space-between; align-items: center; gap: 4rem; }
+    .begin-text .begin-heading { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--forest); font-weight: 700; margin-bottom: 0.6rem; }
+    .begin-text .begin-sub { font-size: 1rem; line-height: 1.75; color: rgba(26,46,26,0.6); max-width: 480px; }
+    .begin-action { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0; }
+    .btn-begin { display: inline-flex; align-items: center; gap: 1rem; background: var(--clay); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 1rem 2rem; border-radius: 4px; transition: background 0.2s; }
+    .btn-begin:hover { background: var(--ember); }
+    .btn-begin .arrow { width: 20px; height: 1px; background: currentColor; position: relative; transition: width 0.25s; }
+    .btn-begin:hover .arrow { width: 28px; }
+    .btn-begin .arrow::after { content: ''; position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border-right: 1px solid currentColor; border-top: 1px solid currentColor; transform: rotate(45deg); }
+    .time-note { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,46,26,0.35); }
+
+    @media (max-width: 768px) {
+      .section-header, .content-block, .predict-block, .boundaries-section, .reflect-block, .explore-block, .transition-card, .begin-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .objectives-bar { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sh-number { font-size: 5rem; }
+      .begin-section { flex-direction: column; align-items: flex-start; }
+      .begin-action { align-items: flex-start; }
+      .predict-options { flex-direction: column; }
+      .boundaries-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="progress-bar"></div>
+
+<button class="sidebar-toggle" aria-label="Toggle navigation">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+<div class="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">EDCI 487<br>Climate Change Education<br>Week 5</div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="week5-intro.html">
+      <span class="nav-num">&#8593;</span>
+      <span class="nav-label">Intro &amp; Overview</span>
+    </a>
+    <a class="nav-item" href="w5-section1.html">
+      <span class="nav-num">01</span>
+      <span class="nav-label">Welcome &amp; Framing</span>
+    </a>
+    <a class="nav-item" href="w5-section2.html">
+      <span class="nav-num">02</span>
+      <span class="nav-label">What Is a Complex Adaptive System?</span>
+    </a>
+    <a class="nav-item active" href="w5-section3.html">
+      <span class="nav-num">03</span>
+      <span class="nav-label">Planetary Boundaries</span>
+    </a>
+    <a class="nav-item" href="w5-section4.html">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Teaching with Complexity</span>
+    </a>
+    <a class="nav-item" href="w5-section5.html">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Before You Arrive</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- SECTION HEADER -->
+<section class="section-header">
+  <div class="block-inner section-header-row">
+    <div class="sh-number">03</div>
+    <div class="sh-center">
+      <div class="sh-label">Section 3 of 5</div>
+      <div class="sh-title reveal">Planetary Boundaries</div>
+    </div>
+    <div class="sh-time reveal">~10 minutes</div>
+  </div>
+</section>
+
+<!-- LEARNING OBJECTIVES -->
+<section class="objectives-bar">
+  <div class="block-inner">
+    <div class="objectives-label">By the end of this section, you will be able to</div>
+    <ul class="objectives-list">
+      <li>Identify the nine planetary boundaries and which seven have been crossed as of the 2025 assessment</li>
+      <li>Explain the concept of a "safe operating space" for humanity</li>
+      <li>Connect the planetary boundaries framework to the CAS properties from Section 2, using your own example</li>
+    </ul>
+  </div>
+</section>
+
+<!-- BODY TEXT — SHORT FRAMING -->
+<section class="content-block reveal">
+  <div class="block-inner">
+    <p>In 2009, scientists at the Stockholm Resilience Centre proposed a framework for what makes our planet habitable: <strong>nine planetary boundaries</strong> that define a safe operating space for humanity. Before we look at where things stand, take a guess.</p>
+  </div>
+</section>
+
+<!-- INTERACTION 1 — PREDICT BEFORE REVEAL -->
+<section class="predict-block reveal" id="predict-section">
+  <div class="block-inner">
+    <div class="predict-label">Predict, then reveal</div>
+    <h2 class="predict-heading" id="predict-heading">How many do you think we've crossed?</h2>
+    <p class="predict-body">The nine boundaries include things like climate change, biodiversity, freshwater, ocean acidification, and the ozone layer.</p>
+    <p class="predict-prompt">Of the nine planetary boundaries, how many do you think humanity has currently crossed?</p>
+
+    <div class="predict-options" id="predict-options">
+      <button class="predict-btn" data-value="0">0</button>
+      <button class="predict-btn" data-value="1-2">1&ndash;2</button>
+      <button class="predict-btn" data-value="3-4">3&ndash;4</button>
+      <button class="predict-btn" data-value="5-6">5&ndash;6</button>
+      <button class="predict-btn" data-value="7-8">7&ndash;8</button>
+      <button class="predict-btn" data-value="9">All 9</button>
+    </div>
+    <p class="predict-hint">No wrong answers here &mdash; your guess is the point. Commit before you click.</p>
+    <button class="reveal-btn" id="reveal-btn" disabled>
+      Reveal the data <span class="arrow"></span>
+    </button>
+
+    <!-- REVEAL RESULT -->
+    <div class="reveal-result" id="reveal-result">
+      <p class="reveal-feedback" id="reveal-feedback"></p>
+      <h2 class="reveal-result-heading">7 of 9 boundaries have been crossed.</h2>
+      <p class="reveal-note" id="reveal-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- PLANETARY BOUNDARIES TABLE -->
+<section class="boundaries-section reveal" id="boundaries-section" style="display:none;">
+  <div class="block-inner">
+    <div class="boundaries-label">The Nine Planetary Boundaries</div>
+    <h2 class="boundaries-heading">Where Earth's systems stand &mdash; 2025 assessment</h2>
+    <div class="boundaries-layout">
+      <div class="boundaries-left">
+        <div class="boundaries-grid">
+          <div class="boundary-row exceeded reveal" data-delay="1">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Climate Change</span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="1">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Biosphere Integrity <em>(biodiversity loss)</em></span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="2">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Land-System Change</span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="2">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Freshwater Change</span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="2">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Biogeochemical Flows <em>(nitrogen &amp; phosphorus)</em></span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="3">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Novel Entities <em>(chemicals, plastics)</em></span>
+          </div>
+          <div class="boundary-row exceeded reveal" data-delay="3">
+            <span class="boundary-status">&#9888; Exceeded</span>
+            <span class="boundary-name">Ocean Acidification <em>(newly crossed, 2025)</em></span>
+          </div>
+          <div class="boundary-row safe reveal" data-delay="3">
+            <span class="boundary-status">&#10003; Safe</span>
+            <span class="boundary-name">Stratospheric Ozone Depletion</span>
+          </div>
+          <div class="boundary-row safe reveal" data-delay="3">
+            <span class="boundary-status">&#10003; Safe</span>
+            <span class="boundary-name">Atmospheric Aerosol Loading</span>
+          </div>
+        </div>
+      </div>
+      <figure class="pb-diagram reveal">
+        <img src="PB_2025.jpg" alt="Planetary boundaries radial diagram showing the 2025 assessment. Seven of nine boundaries extend past the green safe operating space into orange and red zones. Only Stratospheric Ozone Depletion and Atmospheric Aerosol Loading remain within the safe zone." />
+        <figcaption>Source: Stockholm Resilience Centre / Azote, 2025.</figcaption>
+      </figure>
+    </div>
+    <p class="boundaries-note">We are operating outside the conditions that supported human civilization for the past 11,000 years &mdash; and the framework exists precisely so we can see that, name it, and act on it.</p>
+  </div>
+</section>
+
+<!-- OZONE / HOPE TEXT -->
+<section class="content-block alt reveal" id="ozone-section" style="display:none;">
+  <div class="block-inner">
+    <p>Notice the ozone layer and aerosol loading &mdash; both sit inside the safe zone. Global cooperation in the 1980s, through the Montreal Protocol, brought ozone back from the edge. It is the clearest example we have of a boundary actually being pulled back. It is also proof that systemic change is possible.</p>
+    <p>The planetary boundaries framework is not a counsel of despair. It is a <strong>systems map</strong>. And systems maps tell you where to look, what to connect, and what levers might matter. That is precisely what we need educators to be able to do.</p>
+  </div>
+</section>
+
+<!-- INTERACTION 2 — CAS CONNECTION REFLECTION -->
+<section class="reflect-block reveal" id="reflect-section" style="display:none;">
+  <div class="block-inner">
+    <div class="reflect-label">Connect the frameworks</div>
+    <h3 class="reflect-heading">Where do you see CAS in this picture?</h3>
+    <p class="reflect-body">You learned six properties of complex adaptive systems in Section 2: feedback loops, emergence, non-linearity, interdependence, adaptation, and tipping points. The planetary boundaries framework is not just a list of nine things &mdash; it's a systems map.</p>
+    <p class="reflect-prompt">Pick one CAS property and explain where you see it operating in the planetary boundaries framework. A sentence or two is enough.</p>
+    <textarea class="reflect-textarea" placeholder="I see [property] operating in [boundary or interaction] because..."></textarea>
+    <p class="reflect-note">This is for your own thinking &mdash; not submitted. You may want to bring it to class.</p>
+    <div class="reflect-scaffold">
+      <button class="scaffold-toggle" id="scaffold-toggle">Need a starting point?</button>
+      <ul class="scaffold-list" id="scaffold-list">
+        <li>Feedback loops &rarr; think about ice, oceans, and warming</li>
+        <li>Interdependence &rarr; think about freshwater, land-use change, and biodiversity all being crossed together</li>
+        <li>Tipping points &rarr; think about what "crossing" a boundary actually means</li>
+        <li>Emergence &rarr; think about whether anyone designed the current state of the planet</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- GUIDED EXPLORATION -->
+<section class="explore-block reveal" id="explore-section" style="display:none;">
+  <div class="block-inner">
+    <div class="explore-label">Required &middot; Guided Exploration</div>
+    <h3 class="explore-heading">Spend 8 minutes with the Stockholm Resilience Centre</h3>
+    <p class="explore-body">The table and your own reflection above give you the current picture &mdash; that's the data and your thinking on it. This step is about seeing it explained by the scientists who built the framework, including the latest assessments and how the boundaries relate to one another.</p>
+    <ol class="explore-tasks">
+      <li>
+        <span class="task-num">01</span>
+        Click into <strong>Ocean Acidification</strong> &mdash; the boundary most recently confirmed as crossed. What does the site say drove this change?
+      </li>
+      <li>
+        <span class="task-num">02</span>
+        Notice how the site frames the relationship between <strong>social systems and Earth systems</strong> &mdash; does it match the CAS framework from Section 2?
+      </li>
+    </ol>
+    <a class="explore-link" href="https://www.stockholmresilience.org/research/planetary-boundaries.html" target="_blank" rel="noopener">
+      Open Planetary Boundaries <span class="arrow"></span>
+    </a>
+  </div>
+</section>
+
+<!-- TRANSITION CARD -->
+<div class="transition-card reveal">
+  <div class="block-inner">
+    <div class="transition-card-line"></div>
+    <p>We know what the boundaries are. We know seven have been crossed. Now the question becomes pedagogical: how do we teach this to students who are living inside the consequences?</p>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="begin-section reveal">
+  <div class="block-inner" style="display:flex; justify-content:space-between; align-items:center; gap:4rem; width:100%; flex-wrap:wrap;">
+    <div class="begin-text">
+      <h2 class="begin-heading">Explore first, then continue.</h2>
+      <p class="begin-sub">
+        Spend time with the Stockholm Resilience Centre resource above, then continue to Section 4 &mdash; where we look at what interdisciplinary climate teaching actually looks like.
+      </p>
+    </div>
+    <div class="begin-action">
+      <a class="btn-begin" href="w5-section4.html">
+        Section 4 <span class="arrow"></span>
+      </a>
+      <span class="time-note">Next: Teaching with Complexity</span>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Progress bar: 40% to 60%
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const scrolled = max > 0 ? Math.min(doc.scrollTop / max, 1) : 1;
+    const progress = 0.4 + scrolled * 0.2;
+    document.getElementById('progress-bar').style.transform = `scaleX(${progress})`;
+  });
+
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Predict-before-reveal interaction
+  const options = document.querySelectorAll('.predict-btn');
+  const revealBtn = document.getElementById('reveal-btn');
+  const revealResult = document.getElementById('reveal-result');
+  const predictHeading = document.getElementById('predict-heading');
+  const boundariesSection = document.getElementById('boundaries-section');
+  const ozoneSection = document.getElementById('ozone-section');
+  const reflectSection = document.getElementById('reflect-section');
+  const exploreSection = document.getElementById('explore-section');
+
+  options.forEach(btn => {
+    btn.addEventListener('click', () => {
+      options.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      revealBtn.disabled = false;
+    });
+  });
+
+  revealBtn.addEventListener('click', () => {
+    const selected = document.querySelector('.predict-btn.selected');
+    const value = selected ? selected.dataset.value : '';
+    const feedback = document.getElementById('reveal-feedback');
+    const note = document.getElementById('reveal-note');
+
+    if (value === '7-8') {
+      feedback.textContent = 'Good choice.';
+      feedback.style.color = 'var(--sage)';
+      note.textContent = 'Most people underestimate this number — you had a strong sense of where things stand.';
+    } else {
+      feedback.textContent = 'Good try.';
+      feedback.style.color = 'var(--clay)';
+      if (value === '0' || value === '1-2' || value === '3-4' || value === '5-6') {
+        note.textContent = "You're in good company — most people, including many science teachers, underestimate this. The gap between what we sense and what the data shows is part of the problem.";
+      } else {
+        note.textContent = 'Close — two boundaries (ozone and aerosol loading) are still within the safe zone, in part because of global cooperation in the 1980s.';
+      }
+    }
+
+    revealResult.classList.add('shown');
+    revealBtn.style.display = 'none';
+    document.getElementById('predict-options').style.display = 'none';
+    document.querySelector('.predict-hint').style.display = 'none';
+    document.querySelector('.predict-prompt').style.display = 'none';
+    document.querySelector('.predict-body').style.display = 'none';
+
+    // Show hidden sections
+    boundariesSection.style.display = '';
+    ozoneSection.style.display = '';
+    reflectSection.style.display = '';
+    exploreSection.style.display = '';
+
+    // Re-observe reveals inside newly shown sections
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
+  });
+
+  // Scaffold toggle
+  document.getElementById('scaffold-toggle').addEventListener('click', () => {
+    document.getElementById('scaffold-list').classList.toggle('shown');
+  });
+
+  // Sidebar toggle
+  const toggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    toggle.classList.add('open');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    toggle.classList.remove('open');
+  }
+
+  toggle.addEventListener('click', function () {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
